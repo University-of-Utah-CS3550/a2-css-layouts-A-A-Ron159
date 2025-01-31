@@ -3,23 +3,25 @@
 <meta charset="UTF-8"></meta>
 <link rel="icon" href="/static/favicon.ico"></link>
 <link rel="stylesheet" href="/static/main.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM Plex Sans">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM Plex Mono">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
 
-<!--/>NavBar</!-->
+<!--NavBar-->
 <header>
     <nav>
-        <h1>
-            CS 3550
-            <a href="index.html" title="Assignments">Assignments</a>
-            <a href="profile.html" title="Profile">Profile</a>
-        </h1>
+        <h3>
+            <div>CS 3550</div>
+            <div class="assignments"><a href="index.html" title="Assignments">Assignments</a></div>
+            <div class="profile"><a href="profile.html" title="Profile">Profile</a></div>
+        </h3>
     </nav>
 </header>
 
 <!--Login Details-->
 <main>
-    <h1>Login</h1>
+    <div>
+    <h1>Log in</h1>
     <form>
         <div>
             <label for="username">Username:</label>
@@ -33,4 +35,5 @@
             <input class="loginbtn" type="submit" value="Log in" title="Log in">
         </div>
     </form>
+    </div>
 </main>

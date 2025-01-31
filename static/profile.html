@@ -3,59 +3,65 @@
 <meta charset="UTF-8"></meta>
 <link rel="icon" href="/static/favicon.ico"></link>
 <link rel="stylesheet" href="/static/main.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM Plex Sans">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM Plex Mono">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
 
 <!--NavBar-->
 <header>
     <nav>
-        <h1>
-            CS 3550
-            <a href="index.html" title="Assignments">Assignments</a>
-            <a href="profile.html" title="Profile">Profile</a>
-        </h1>
+        <h3>
+            <div>CS 3550</div>
+            <div class="assignments"><a href="index.html" title="Assignments">Assignments</a></div>
+            <div class="profile"><a href="profile.html" title="Profile">Profile</a></div>
+        </h3>
     </nav>
 </header>
 
 <!--Grades list-->
 <main>
-    <h1>Your grades</h1>
-    <section>
-        <p>Currently logged in as ta1. <a href="login.html" title="Log out" role="button">Log out</a></p>
-    </section>
+    <div>
+        <h1>Your grades</h1>
+        <section>
+            <div>
+                <p>Currently logged in as ta1.</p>
+                <a href="login.html" title="Log out" role="button">Log out</a>
+            </div>
+        </section>
 
-    <table>
-        <tr>
-            <th class="txtcol">Assignment</th>
-            <th class="numcol">Graded</th>
-        </tr>
-        <tr>
-            <td><a href="" title="View Submissions">Github username</a></td>
-            <td class="numcol">2/3</td>
-        </tr>
-        <tr>
-            <td><a href="submissions.html" title="View Submissions">Homework 1 (HTML)</a></td>
-            <td class="numcol">1/2</td>
-        </tr>
-        <tr>
-            <td><a href="" title="View Submissions">Homework 2 (CSS)</a></td>
-            <td class="numcol">0/1</td>
-        </tr>
-        <tr>
-            <td><a href="" title="View Submissions">Homework 3 (Backend)</a></td>
-            <td class="numcol">0/0</td>
-        </tr>
-        <tr>
-            <td><a href="" title="View Submissions">Homework 4 (Deploy)</a></td>
-            <td class="numcol">0/0</td>
-        </tr>
-        <tr>
-            <td><a href="" title="View Submissions">Homework 5 (Permissions)</a></td>
-            <td class="numcol">0/0</td>
-        </tr>
-        <tr>
-            <td><a href="" title="View Submissions">Homework 6 (JS)</a></td>
-            <td class="numcol">0/0</td>
-        </tr>
-    </table>
+        <table>
+            <tr>
+                <th class="txtcol">Assignment</th>
+                <th class="numcol">Graded</th>
+            </tr>
+            <tr>
+                <td><a href="" title="View Submissions">Github username</a></td>
+                <td class="numcol">2/3</td>
+            </tr>
+            <tr>
+                <td><a href="submissions.html" title="View Submissions">Homework 1 (HTML)</a></td>
+                <td class="numcol">1/2</td>
+            </tr>
+            <tr>
+                <td><a href="" title="View Submissions">Homework 2 (CSS)</a></td>
+                <td class="numcol">0/1</td>
+            </tr>
+            <tr>
+                <td><a href="" title="View Submissions">Homework 3 (Backend)</a></td>
+                <td class="numcol">0/0</td>
+            </tr>
+            <tr>
+                <td><a href="" title="View Submissions">Homework 4 (Deploy)</a></td>
+                <td class="numcol">0/0</td>
+            </tr>
+            <tr>
+                <td><a href="" title="View Submissions">Homework 5 (Permissions)</a></td>
+                <td class="numcol">0/0</td>
+            </tr>
+            <tr>
+                <td><a href="" title="View Submissions">Homework 6 (JS)</a></td>
+                <td class="numcol">0/0</td>
+            </tr>
+        </table>
+    </div>
 </main>
