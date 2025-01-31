@@ -1,1 +1,40 @@
-* {color : yellow;}
+/* Phase 2 CSS Code */
+body {
+    font-family: "IBM Plex Sans", Arial, serif;
+    line-height: 1.25;
+  }
+
+code {
+    font-family: "IBM Plex Mono", Arial, serif;
+  }
+
+nav {
+    font-size: 125%;
+}
+
+nav h1{
+    font-weight: bold;
+}
+
+nav h1 a{
+    font-weight: 400;
+    color: darkgray;
+}
+
+main h1 {
+    font-size: 150%;
+}
+
+main h4{
+    font-size: 100%;
+}
+
+main form{
+    font-size: 125%;
+}
+
+table {
+    line-height: 1.5;
+}
+
+/* Phase 3 */
