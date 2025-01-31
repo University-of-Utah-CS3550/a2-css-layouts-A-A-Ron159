@@ -19,6 +19,7 @@ nav h1{
 nav h1 a{
     font-weight: 400;
     color: darkgray;
+    text-decoration: none;
 }
 
 main h1 {
@@ -38,3 +39,32 @@ table {
 }
 
 /* Phase 3 */
+nav h1 a:hover{
+    text-decoration: underline;
+}
+
+table {
+    width: 100%;
+}
+
+.numcol {
+    text-align: right;
+}
+
+.txtcol {
+    text-align: left;
+}
+
+main form {
+    gap: 1rem;
+}
+
+main form div input{
+    width: 50%;
+    text-align: right;
+}
+
+.loginbtn {
+    text-align: center;
+    justify-content: center;
+}
