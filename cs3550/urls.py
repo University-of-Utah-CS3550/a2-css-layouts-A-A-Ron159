@@ -16,7 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from grades import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("", views.index),
+    path("profile/", views.profile),
+    path("profile/login/", views.login_form),
+    path("<int:assignment_id>/", views.assignment, name='assignment'),
+    path("<int:assignment_id>/submissions", views.submissions, name='submissions'),
 ]
