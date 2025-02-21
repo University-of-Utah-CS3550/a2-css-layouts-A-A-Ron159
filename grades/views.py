@@ -1,8 +1,13 @@
 from django.shortcuts import render
+from . import models
+
 
 # Create your views here.
 def index(request):
-    return render(request, "index.html")
+    assignments = models.Assignment.objects.all()
+    return render(request, "index.html", {
+        'Assignments' : assignments
+    })
 
 def assignment(request, assignment_id):
     return render(request, "assignment.html")
