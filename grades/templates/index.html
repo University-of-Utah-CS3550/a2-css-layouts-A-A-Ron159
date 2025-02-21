@@ -8,16 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
 
 
-<!--NavBar-->
-<header>
-    <nav>
-        <h3>
-            <div>CS 3550</div>
-            <div class="assignments"><a href="/" title="Assignments">Assignments</a></div>
-            <div class="profile"><a href="profile.html" title="Profile">Profile</a></div>
-        </h3>
-    </nav>
-</header>
+{% include 'header.html' %}
 
 <!--Assignment List-->
 <main>
@@ -36,21 +27,6 @@
             <td class="numcol">{{ assignment.points }}</td>
         </tr>
         {% endfor %}
-        <!-- <tr>
-            <td><a href="" title="Assignment - Github username">Github username</a></td>
-            <td>Aug 01</td>
-            <td class="numcol">1</td>
-        </tr>
-        <tr>
-            <td><a href="assignment.html" title="Homework 1 (HTML)">Homework 1 (HTML)</a></td>
-            <td>Sep 08</td>
-            <td class="numcol">100</td>
-        </tr>
-        <tr>
-            <td><a href="" title="Homework 2 (CSS)">Homework 2 (CSS)</a></td>
-            <td>Sep 22</td>
-            <td class="numcol">100</td>
-        </tr> -->
     </table>
     </div>
 </main>

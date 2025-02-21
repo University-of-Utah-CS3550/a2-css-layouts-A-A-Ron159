@@ -7,16 +7,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
 
-<!--NavBar-->
-<header>
-    <nav>
-        <h3>
-            <div>CS 3550</div>
-            <div class="assignments"><a href="index.html" title="Assignments">Assignments</a></div>
-            <div class="profile"><a href="profile.html" title="Profile">Profile</a></div>
-        </h3>
-    </nav>
-</header>
+{% include 'header.html' %}
 
 <!--Grades list-->
 <main>
@@ -24,8 +15,8 @@
         <h1>Your grades</h1>
         <section>
             <div>
-                <p>Currently logged in as ta1.</p>
-                <a href="login.html" title="Log out" role="button">Log out</a>
+                <p>Currently logged in as {{ grader_name.get_full_name }}.</p>
+                <a href="login/" title="Log out" role="button">Log out</a>
             </div>
         </section>
 
@@ -34,34 +25,12 @@
                 <th class="txtcol">Assignment</th>
                 <th class="numcol">Graded</th>
             </tr>
+            {% for assignment in Assignments %}
             <tr>
-                <td><a href="" title="View Submissions">Github username</a></td>
-                <td class="numcol">2/3</td>
+                <td><a href="/{{ assignment.id }}/" title="{{ assignment.title }}">{{ assignment.title }}</a><td>
+                <td class="numcol">{{ assignment.submissions_graded }}/{{ assignment.submission_count }}</td>
             </tr>
-            <tr>
-                <td><a href="submissions.html" title="View Submissions">Homework 1 (HTML)</a></td>
-                <td class="numcol">1/2</td>
-            </tr>
-            <tr>
-                <td><a href="" title="View Submissions">Homework 2 (CSS)</a></td>
-                <td class="numcol">0/1</td>
-            </tr>
-            <tr>
-                <td><a href="" title="View Submissions">Homework 3 (Backend)</a></td>
-                <td class="numcol">0/0</td>
-            </tr>
-            <tr>
-                <td><a href="" title="View Submissions">Homework 4 (Deploy)</a></td>
-                <td class="numcol">0/0</td>
-            </tr>
-            <tr>
-                <td><a href="" title="View Submissions">Homework 5 (Permissions)</a></td>
-                <td class="numcol">0/0</td>
-            </tr>
-            <tr>
-                <td><a href="" title="View Submissions">Homework 6 (JS)</a></td>
-                <td class="numcol">0/0</td>
-            </tr>
+            {% endfor %}
         </table>
     </div>
 </main>

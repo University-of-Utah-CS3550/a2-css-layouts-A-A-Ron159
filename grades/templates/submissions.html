@@ -7,22 +7,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
 
-<!--NavBar-->
-<header>
-    <nav>
-        <h3>
-            <div>CS 3550</div>
-            <div class="assignments"><a href="index.html" title="Assignments">Assignments</a></div>
-            <div class="profile"><a href="profile.html" title="Profile">Profile</a></div>
-        </h3>
-    </nav>
-</header>
+
+{% include 'header.html' %}
 
 <!--Homeowrk 1 Submissions-->
 <main>
     <div>
-        <h1>Homework 1 (HTML)</h1>
-        <p>All grades out of 100</p>
+        <h1>{{ assignment.title }}</h1>
+        <p>All grades out of {{ points }}</p>
 
         <form>
         <table>
@@ -31,21 +23,17 @@
                 <th class="txtcol">Submission</th>
                 <th class="txtcol">Grade</th>
             </tr>
+            {% for submission in submissions %}
             <tr>
-                <td class="txtcol">s1</td>
-                <td class="txtcol"><a href="#" title="View Submission 1">Submission</a></td>
-                <td class="txtcol"><label for="grade1"></label><input id="grade1" name="spinbox" type="number" min="0" max="100" step="1" value="93" title="Enter in a grade"></td>
+                <td class="txtcol">{{ submission.author.get_full_name }}</td>
+                <td class="txtcol"><a href="{{ submission.file.url }}" title="View Submission {{ submission.id }}">Submission</a></td>
+                <td class="txtcol"><label for="grade1"></label><input id="grade1" name="spinbox" type="number" min="0" max="100" step="1" value="{{ submission.score }}" title="Enter in a grade"></td>
             </tr>
-            <tr>
-                <td class="txtcol">s2</td>
-                <td class="txtcol"><a href="#" title="View Submission 2">Submission</a></td>
-                <td class="txtcol"><label for="grade2"></label><input id="grade2" name="spinbox" type="number" min="0" max="100" step="1" value="" title="Enter in a grade"></td>
-            </tr>
-        </table>
-        <div class="submitdiv">
-            <input type="submit" value="Submit" title="Submit Grades" class="submitbtn">
-            <a href="assignment.html" title="Back to Assignment Page">Back to Assignment</a>    
-        </div>
+            {% endfor %}
+            <div class="submitdiv">
+                <input type="submit" value="Submit" title="Submit Grades" class="submitbtn">
+                <a href="/{{ assignment.id }}" title="Back to Assignment Page">Back to Assignment</a>    
+            </div>
         </form>
     </div>
 </main>
