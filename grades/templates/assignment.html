@@ -12,8 +12,8 @@
     <nav>
         <h3>
             <div>CS 3550</div>
-            <div class="assignments"><a href="index.html" title="Assignments">Assignments</a></div>
-            <div class="profile"><a href="profile.html" title="Profile">Profile</a></div>
+            <div class="assignments"><a href="/" title="Assignments">Assignments</a></div>
+            <div class="profile"><a href="/profile/" title="Profile">Profile</a></div>
         </h3>
     </nav>
 </header>
@@ -21,29 +21,17 @@
 <!--Assignment Content-->
 <main>
     <div>
-        <h1>Homework 1 (HTML)</h1>
-        <p>Due September 8, 2025, total of 100 points<p>
+        <h1>{{ title }}</h1>
+        <p>Due {{ deadline }}, total of {{ points }} point{{ points|pluralize }}<p>
         <section>
-            <p>Currently 2/3 submissions</p>
+            <p>Currently {{ submissions }}/{{ student_count }} submissions</p>
             <div>
-                <p>1 submission assigned to you</p>
-                <a href="submissions.html" title="Submissions" role="button">Grade</a>      
+                <p>{{ submissions }} submission{{ submissions|pluralize }} assigned to you</p>
+                <a href="submissions/" title="Submissions" role="button">Grade</a>      
             </div>
         </section>
 
         <h4>Description</h4>
-        <p>In this assignment, you will set up a web server serving HTML web pages for the grading application:</p>
-        <ul>
-            <li>Configure and start a <em>basic web server</em> using Django</li>
-            <li>Create <em>basic web pages</em> using HTML for data/content</li>
-        </ul>
-        <p>For example, here is a page <strong>you will make</strong>, in a file called <code>assignments.html</code>:</p>
-        <img src="/static/assignments.png"
-            alt="A screenshot of a representative example of the finished webpage.
-              A grey NavBar is present at the top with CS 3550 in black appearing first on the left.
-              The text Assignemnts in dark grey appears next in the NavBar.
-              Then the text Profile in dark grey is at the very end of the NavBar
-              Next is the title All assignments with a thin line underneath it.
-              Then there is a table of 7 total assignments, each with a title, due date, and weight.">
+        {{ description | safe}}
     </div>
 </main>

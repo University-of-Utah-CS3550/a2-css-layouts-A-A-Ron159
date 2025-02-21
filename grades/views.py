@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from . import models
 
 
@@ -10,7 +10,18 @@ def index(request):
     })
 
 def assignment(request, assignment_id):
-    return render(request, "assignment.html")
+    assignment = get_object_or_404(models.Assignment, id=assignment_id)
+    assignment_data = {
+        'assignment_id' : assignment_id,
+        'title' : assignment.title,
+        'description' : assignment.description,
+        'deadline' : assignment.deadline,
+        'weight' : assignment.weight,
+        'points' : assignment.points,
+        'submissions' : assignment.submission_set.count(),
+        'student_count' : models.Group.objects.get(name="Students").user_set.count()
+    }
+    return render(request, "assignment.html", assignment_data)
 
 def submissions(request, assignment_id):
     return render(request, "submissions.html")
