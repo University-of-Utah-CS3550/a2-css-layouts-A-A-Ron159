@@ -16,7 +16,8 @@
         <h1>{{ assignment.title }}</h1>
         <p>All grades out of {{ points }}</p>
 
-        <form>
+        <form action="/{{ assignment.id }}/submissions" method="post">
+        {% csrf_token %}
         <table>
             <tr>
                 <th class="txtcol">Student</th>
