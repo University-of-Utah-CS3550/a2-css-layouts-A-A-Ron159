@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.shortcuts import redirect, render, get_object_or_404
 from . import models
 from django.db.models import Count, Q
@@ -29,6 +30,9 @@ def assignment(request, assignment_id):
 
 def submissions(request, assignment_id):
     if request.method == "POST":
+        assignment = get_object_or_404(models.Assignment, id=assignment_id)
+        grader = get_object_or_404(User, username='g')
+        process_grades(request.POST, assignment, grader)
         return redirect(f"/{assignment_id}/submissions/")
     assignment = models.Assignment.objects.get(id=assignment_id)
     grader = User.objects.get(username='g')  # Assuming 'g' is the username of the grader
@@ -57,3 +61,22 @@ def profile(request):
 
 def login_form(request):
     return render(request, "login.html")
+
+def process_grades(post_data, assignment, grader):
+    submissions_to_update = []
+    for key in post_data:
+        if key.startswith('grade-'):
+            submission_id = int(key.removeprefix('grade-'))
+            try:
+                submission = models.Submission.objects.get(id=submission_id, assignment=assignment, grader=grader)
+                grade = post_data[key]
+                if grade == '':
+                    submission.score = None
+                else:
+                    submission.score = Decimal(grade)
+                submissions_to_update.append(submission)
+                print(f"Submission ID: {submission_id}, Score: {submission.score}")
+            except models.Submission.DoesNotExist:
+                continue
+    models.Submission.objects.bulk_update(submissions_to_update, ['score'])
+    print(f"Updated Submissions: {len(submissions_to_update)}")
