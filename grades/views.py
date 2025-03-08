@@ -29,21 +29,47 @@ def assignment(request, assignment_id):
     return render(request, "assignment.html", assignment_data)
 
 def submissions(request, assignment_id):
-    if request.method == "POST":
-        assignment = get_object_or_404(models.Assignment, id=assignment_id)
-        grader = get_object_or_404(User, username='g')
-        process_grades(request.POST, assignment, grader)
-        return redirect(f"/{assignment_id}/submissions/")
-    assignment = models.Assignment.objects.get(id=assignment_id)
-    grader = User.objects.get(username='g')  # Assuming 'g' is the username of the grader
+    assignment = get_object_or_404(models.Assignment, id=assignment_id)
+    grader = get_object_or_404(User, username='g')
     submissions = models.Submission.objects.filter(assignment=assignment, grader=grader).order_by('author__username')
-    
+
+    errors = {}
+    generic_errors = []
+
+    if request.method == "POST":
+        for key, value in request.POST.items():
+            if key.startswith("grade-"):
+                submission_id = key[6:]
+                try:
+                    submission_id = int(submission_id)
+                    submission = models.Submission.objects.get(id=submission_id, assignment=assignment)
+                    
+                    try:
+                        grade = float(value)
+                        if grade < 0 or grade > assignment.points:
+                            raise ValueError("Grade must be between 0 and the number of points offered on this assignment.")
+                        submission.score = grade
+                        submission.save()
+                    except ValueError as e:
+                        if submission_id not in errors:
+                            errors[submission_id] = []
+                        errors[submission_id].append(str(e))
+                except (ValueError, models.Submission.DoesNotExist) as e:
+                    generic_errors.append(f"Invalid submission ID: {submission_id}. {str(e)}")
+        
+        if not errors and not generic_errors:
+            return redirect(f"/{assignment_id}/submissions/")
+
     context = {
         'assignment': assignment,
         'submissions': submissions,
-        'points': assignment.points
+        'points': assignment.points,
+        'errors': errors,
+        'generic_errors': generic_errors
     }
+
     return render(request, "submissions.html", context)
+
 
 def profile(request):
     assignments = models.Assignment.objects.annotate(

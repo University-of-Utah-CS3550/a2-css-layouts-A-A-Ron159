@@ -1,41 +1,71 @@
-<!doctype html>
-<title>Submissions- Homework 1 - CS 3550</title>
-<meta charset="UTF-8"></meta>
-<link rel="icon" href="/static/favicon.ico"></link>
-<link rel="stylesheet" href="/static/main.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submissions - Homework 1 - CS 3550</title>
+    <link rel="icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@100;200;300;400;500;600;700&family=IBM+Plex+Sans:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
 
 {% include 'header.html' %}
 
-<!--Homeowrk 1 Submissions-->
+<!-- Homework 1 Submissions -->
 <main>
     <div>
         <h1>{{ assignment.title }}</h1>
         <p>All grades out of {{ points }}</p>
 
-        <form action="/{{ assignment.id }}/submissions/" method="post">
-        {% csrf_token %}
-        <table>
-            <tr>
-                <th class="txtcol">Student</th>
-                <th class="txtcol">Submission</th>
-                <th class="txtcol">Grade</th>
-            </tr>
-            {% for submission in submissions %}
-            <tr>
-                <td class="txtcol">{{ submission.author.get_full_name }}</td>
-                <td class="txtcol"><a href="{{ submission.file.url }}" title="View Submission {{ submission.id }}">Submission</a></td>
-                <td class="txtcol"><label for="grade-{{ submission.id }}"></label><input id="grade-{{ submission.id }}" name="grade-{{ submission.id }}" type="number" min="0" max="100" step="0.01" value="{{ submission.score }}" title="Enter in a grade"></td>
-            </tr>
+        
+        {% if generic_errors %}
+        <div class="error-messages">
+            {% for error in generic_errors %}
+            <output>{{ error }}</output>
             {% endfor %}
-        </table>
-        <div class="submitdiv">
-            <input type="submit" value="Submit" title="Submit Grades" class="submitbtn">
-            <a href="/{{ assignment.id }}" title="Back to Assignment Page">Back to Assignment</a>    
         </div>
+        {% endif %}
+        
+
+        <form action="/{{ assignment.id }}/submissions/" method="post">
+            {% csrf_token %}
+            {% if errors %}
+            <div class="error-messages">
+                {% for submission_id, error_list in errors.items %}
+                {% for error in error_list %}
+                <output>{{ error }}</output>
+                {% endfor %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col" class="txtcol">Student</th>
+                        <th scope="col" class="txtcol">Submission</th>
+                        <th scope="col" class="txtcol">Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for submission in submissions %}
+                    <tr>
+                        <td class="txtcol">{{ submission.author.get_full_name }}</td>
+                        <td class="txtcol"><a href="{{ submission.file.url }}" title="View Submission {{ submission.id }}">Submission</a></td>
+                        <td class="txtcol"><label for="grade-{{ submission.id }}"></label><input id="grade-{{ submission.id }}" name="grade-{{ submission.id }}" type="number" min="0" max="{{ assignment.points }}" step="0.01" value="{{ submission.score }}" title="Enter a grade"></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="submitdiv">
+                <input type="submit" value="Submit" title="Submit Grades" class="submitbtn">
+                <a href="/{{ assignment.id }}" title="Back to Assignment Page">Back to Assignment</a>    
+            </div>
         </form>
     </div>
 </main>
+
+</body>
+</html>
