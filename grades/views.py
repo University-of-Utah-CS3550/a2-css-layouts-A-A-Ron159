@@ -14,7 +14,22 @@ def index(request):
 
 def assignment(request, assignment_id):
     assignment = get_object_or_404(models.Assignment, id=assignment_id)
+    alice_submissions = assignment.submission_set.filter(author__username='a')
     submissions_assigned_to_g = assignment.submission_set.filter(grader__username='g').count()
+    
+    if request.method == "POST":
+        file = request.FILES.get('file')
+        if file:
+            alice = get_object_or_404(User, username='a')
+            try:
+                submission = models.Submission.objects.get(assignment=assignment, author=alice)
+                submission.file = file
+            except models.Submission.DoesNotExist:
+                garry_grader = get_object_or_404(User, username='g')
+                submission = models.Submission(assignment=assignment, author=alice, grader=garry_grader, file=file, score=None)
+            submission.save()
+            return redirect('assignment', assignment_id=assignment_id)
+
     assignment_data = {
         'assignment_id' : assignment_id,
         'title' : assignment.title,
@@ -23,6 +38,7 @@ def assignment(request, assignment_id):
         'weight' : assignment.weight,
         'points' : assignment.points,
         'submissions' : assignment.submission_set.count(),
+        'alice_submissions' : alice_submissions,
         'submissions_assigned' : submissions_assigned_to_g,
         'student_count' : models.Group.objects.get(name="Students").user_set.count()
     }
