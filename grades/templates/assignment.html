@@ -17,7 +17,7 @@
         <!--Submission Card-->
         <section>
             {% if alice_submissions.exists %}
-                <p>Current submission: {{ alice_submissions.first.file.name }}</p>
+                <p>Current submission: <a href="{{ alice_submissions.first.file.url }}" title="View Submission">{{ alice_submissions.first.file.name }}</a></p>
             {% else %}
                 <p>No current submission</p>
             {% endif %}

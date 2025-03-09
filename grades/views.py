@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from . import models
 from django.db.models import Count, Q
@@ -122,3 +123,8 @@ def process_grades(post_data, assignment, grader):
                 continue
     models.Submission.objects.bulk_update(submissions_to_update, ['score'])
     print(f"Updated Submissions: {len(submissions_to_update)}")
+
+def show_upload(request, filename):
+    submission = get_object_or_404(models.Submission, file=filename)
+    return HttpResponse(submission.file.open())
+
