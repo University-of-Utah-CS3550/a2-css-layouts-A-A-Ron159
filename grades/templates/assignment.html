@@ -15,9 +15,10 @@
         <h1>{{ title }}</h1>
         <p>Due {{ deadline }}, total of {{ points }} point{{ points|pluralize }}<p>
         <!--Submission Card-->
+        {% if user_role == 'student' or not user.is_authenticated %}
         <section>
-            {% if alice_submissions.exists %}
-                <p>Current submission: <a href="{{ alice_submissions.first.file.url }}" title="View Submission">{{ alice_submissions.first.file.name }}</a></p>
+            {% if user_submissions.exists %}
+                <p>Current submission: <a href="{{ user_submissions.first.file.url }}" title="View Submission">{{ user_submissions.first.file.name }}</a></p>
             {% else %}
                 <p>No current submission</p>
             {% endif %}
@@ -27,14 +28,21 @@
                     <input type="submit" value="Submit">
                 </form>
         </section>
+        {% endif %}
         <!--Grading Card-->
+        {% if user_role == "ta" or user_role == "admin" %}
         <section>
             <p>Currently {{ submissions }}/{{ student_count }} submissions</p>
             <div>
+                {% if user_role == "ta" %}
                 <p>{{ submissions_assigned }} submission{{ submissions|pluralize }} assigned to you</p>
+                {% elif user_role == "admin" %}
+                {% endif %}        
                 <a href="submissions/" title="Submissions" role="button">Grade</a>      
             </div>
+            
         </section>
+        {% endif %}
 
         <h4>Description</h4>
         {{ description | safe}}

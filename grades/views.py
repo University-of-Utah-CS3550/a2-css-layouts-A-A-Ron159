@@ -15,9 +15,23 @@ def index(request):
     })
 
 def assignment(request, assignment_id):
+    request.user
     assignment = get_object_or_404(models.Assignment, id=assignment_id)
-    alice_submissions = assignment.submission_set.filter(author__username='a')
-    submissions_assigned_to_g = assignment.submission_set.filter(grader__username='g').count()
+    user_submissions = assignment.submission_set.filter(author__username=request.user)
+    # alice_submissions = assignment.submission_set.filter(author__username='a')
+    submissions_assigned_to_user = assignment.submission_set.filter(grader__username=request.user).count()
+    # submissions_assigned_to_g = assignment.submission_set.filter(grader__username='g').count()
+
+    if not request.user.is_authenticated:  # Anonymous users are treated as students
+        user_role = "student"
+    elif is_admin(request.user):  # Admin user
+        user_role = "admin"
+    elif is_ta(request.user):  # TA user
+        user_role = "ta"
+    elif is_student(request.user):  # Student user
+        user_role = "student"
+    else:
+        user_role = "unknown"  # Fallback, though this should not occur
     
     if request.method == "POST":
         file = request.FILES.get('file')
@@ -40,16 +54,22 @@ def assignment(request, assignment_id):
         'weight' : assignment.weight,
         'points' : assignment.points,
         'submissions' : assignment.submission_set.count(),
-        'alice_submissions' : alice_submissions,
-        'submissions_assigned' : submissions_assigned_to_g,
-        'student_count' : models.Group.objects.get(name="Students").user_set.count()
+        'user_submissions' : user_submissions,
+        # 'alice_submissions' : alice_submissions,
+        'submissions_assigned' : submissions_assigned_to_user,
+        # 'submissions_assigned' : submissions_assigned_to_g,
+        'student_count' : models.Group.objects.get(name="Students").user_set.count(),
+        "user_role": user_role,
     }
     return render(request, "assignment.html", assignment_data)
 
 def submissions(request, assignment_id):
     assignment = get_object_or_404(models.Assignment, id=assignment_id)
-    grader = get_object_or_404(User, username='g')
-    submissions = models.Submission.objects.filter(assignment=assignment, grader=grader).order_by('author__username')
+    if request.user.is_superuser:
+        submissions = models.Submission.objects.filter(assignment=assignment).order_by('author__username')
+    elif is_ta(request.user) :
+        grader = get_object_or_404(User, username=request.user)
+        submissions = models.Submission.objects.filter(assignment=assignment, grader=grader).order_by('author__username')
 
     errors = {}
     generic_errors = []
@@ -143,3 +163,11 @@ def show_upload(request, filename):
     submission = get_object_or_404(models.Submission, file=filename)
     return HttpResponse(submission.file.open())
 
+def is_student(user):
+    return user.groups.filter(name="Students").exists()
+
+def is_ta(user):
+    return user.groups.filter(name="Teaching Assistants").exists()
+
+def is_admin(user):
+    return user.is_superuser
