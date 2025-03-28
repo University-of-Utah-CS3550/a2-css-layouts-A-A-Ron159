@@ -5,6 +5,7 @@ from . import models
 from django.db.models import Count, Q
 from django.contrib.auth.models import User
 from django.db.models import F
+from django.contrib.auth import authenticate, login, logout
 
 # Create your views here.
 def index(request):
@@ -97,12 +98,26 @@ def profile(request):
 
     profile_info = {
         'Assignments': assignments,
-        'grader_name': grader_name
+        'grader_name': grader_name,
+        'user' : request.user
     }
 
     return render(request, "profile.html", profile_info)
 
 def login_form(request):
+    if request.method == "POST":
+        inputted_username = request.POST.get("username", "")
+        inputted_password = request.POST.get("password", "")
+        user = authenticate(username = inputted_username, password = inputted_password)
+        if user is not None:
+            login(request, user)
+            return redirect("profile")
+        else:
+            return render(request, "login.html")
+    return render(request, "login.html")
+
+def logout_form(request):
+    logout(request)
     return render(request, "login.html")
 
 def process_grades(post_data, assignment, grader):

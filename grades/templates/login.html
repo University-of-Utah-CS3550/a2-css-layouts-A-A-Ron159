@@ -13,14 +13,15 @@
 <main>
     <div>
     <h1>Log in</h1>
-    <form>
+    <form action="/profile/login/" method="post">
+        {% csrf_token %}
         <div>
             <label for="username">Username:</label>
-            <input type="text" id="username" autofocus="true" title="Enter in a username"/>
+            <input type="text" id="username" name="username" autofocus="true" title="Enter in a username"/>
         </div>
         <div>
             <label for="password">Password:</label>
-            <input type="password" id="password" title="Enter in a password"/>
+            <input type="password" id="password" name="password" title="Enter in a password"/>
         </div>
         <div>
             <input class="loginbtn" type="submit" value="Log in" title="Log in">
