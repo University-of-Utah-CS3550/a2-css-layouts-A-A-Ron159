@@ -14,21 +14,46 @@
     <div>
         <h1>{{ title }}</h1>
         <p>Due {{ deadline }}, total of {{ points }} point{{ points|pluralize }}<p>
+        
         <!--Submission Card-->
-        {% if user_role == 'student' or not user.is_authenticated %}
+        {% if user_role == 'student' %}
         <section>
-            {% if user_submissions.exists %}
+            <!-- {% if user_submissions.exists %}
                 <p>Current submission: <a href="{{ user_submissions.first.file.url }}" title="View Submission">{{ user_submissions.first.file.name }}</a></p>
             {% else %}
                 <p>No current submission</p>
+            {% endif %} -->
+
+            {% if grade_status == 'Graded' %}
+                <p>Your submission, <a href="{{ user_submissions.first.file.url }}" title="View Submission">{{ user_submissions.first.file.name }}</a>, received {{earned_points}}/{{available_points}} points ({{score}}%)</p>
             {% endif %}
+
+            {% if grade_status == 'Ungraded' and due_status == 'Overdue' %}
+            <p>Your submission, <a href="{{ user_submissions.first.file.url }}" title="View Submission">{{ user_submissions.first.file.name }}</a>, is being graded.</p>
+            {% endif %}
+
+            {% if grade_status == 'Ungraded' and due_status == 'Not Due'%}
+            <p>Your current submission is <a href="{{ user_submissions.first.file.url }}" title="View Submission">{{ user_submissions.first.file.name }}</a></p>
+            {% endif %}
+
+            {% if not user_submissions.exists and due_status == "Not Due"%}
+            <p>No current submission</p>
+            {% endif %}
+
+            {% if grade_status == 'Missing' %}
+            <p>You did not submit this assignment and received 0 points</p>
+            {% endif %}
+
+                {% if due_status == "Not Due" %}
                 <form action="{% url 'assignment' assignment_id %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <input type="file" name="file">
                     <input type="submit" value="Submit">
                 </form>
+                {% endif %}
         </section>
         {% endif %}
+        
         <!--Grading Card-->
         {% if user_role == "ta" or user_role == "admin" %}
         <section>

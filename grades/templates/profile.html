@@ -23,14 +23,30 @@
         <table>
             <tr>
                 <th class="txtcol">Assignment</th>
+                {% if user_role == "admin" or user_role == "ta" %}
                 <th class="numcol">Graded</th>
+                {% endif %}
+                {% if user_role == "student" %}
+                <th class="numcol">Score</th>
+                {% endif %}
             </tr>
-            {% for assignment in Assignments %}
+            {% for assignment in assignments %}
             <tr>
-                <td><a href="/{{ assignment.id }}/" title="{{ assignment.title }}">{{ assignment.title }}</a><td>
+                <td><a href="/{{ assignment.id }}/" title="{{ assignment.title }}">{{ assignment.title }}</a></td>
+                {% if user_role == "student" %}
+                <td class="numcol">{% if assignment.status == "Graded" %}{{ assignment.score |floatformat:2 }}%{% else %}{{ assignment.status }}{% endif %}</td>
+                {% endif %}
+                {% if user_role == "admin" or user_role == "ta" %}
                 <td class="numcol">{{ assignment.submissions_graded }}/{{ assignment.submission_count }}</td>
+                {% endif %}
             </tr>
             {% endfor %}
+            {% if user_role == "student" %}
+            <tr>
+                <th class="txtcol">Final Grade</th>
+                <th class="numcol">{{ current_grade|floatformat:2 }}%</td>
+            </tr>
+            {% endif %}
         </table>
     </div>
 </main>

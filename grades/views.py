@@ -1,11 +1,13 @@
+from datetime import timezone
 from decimal import Decimal
 from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from . import models
 from django.db.models import Count, Q
 from django.contrib.auth.models import User
-from django.db.models import F
 from django.contrib.auth import authenticate, login, logout
+from django.utils import timezone
+from django.contrib.auth.models import Group
 
 # Create your views here.
 def index(request):
@@ -17,32 +19,80 @@ def index(request):
 def assignment(request, assignment_id):
     request.user
     assignment = get_object_or_404(models.Assignment, id=assignment_id)
-    user_submissions = assignment.submission_set.filter(author__username=request.user)
+    user_submissions = assignment.submission_set.filter(author=request.user)
+    print(user_submissions)
     # alice_submissions = assignment.submission_set.filter(author__username='a')
     submissions_assigned_to_user = assignment.submission_set.filter(grader__username=request.user).count()
     # submissions_assigned_to_g = assignment.submission_set.filter(grader__username='g').count()
+
+    assignment.grade_status = None
+    assignment.due_status = None
 
     if not request.user.is_authenticated:  # Anonymous users are treated as students
         user_role = "student"
     elif is_admin(request.user):  # Admin user
         user_role = "admin"
+        total_available_points = None
+        total_earned_points = None
+        assignment.score = None
+        assignment.status = None
+
     elif is_ta(request.user):  # TA user
         user_role = "ta"
+        total_available_points = None
+        total_earned_points = None
+        assignment.score = None
+        
     elif is_student(request.user):  # Student user
         user_role = "student"
-    else:
-        user_role = "unknown"  # Fallback, though this should not occur
+        user = User.objects.get(username=request.user)
+        total_available_points = 0
+        total_earned_points = 0
+        assignment.score = None
+        submission = models.Submission.objects.filter(assignment=assignment, author=user).first()
+        if submission:
+            # Graded submission 
+            if submission.score is not None:  
+                assignment.score = (submission.score / assignment.points) * 100
+                total_available_points += assignment.weight
+                total_earned_points += (submission.score / assignment.points) * assignment.weight
+                assignment.grade_status = 'Graded'
+            # Submitted but not yet graded
+            else:  
+                assignment.grade_status = 'Ungraded'
+        else:
+            if assignment.deadline < timezone.now():  # Overdue and no submission
+                assignment.grade_status = 'Missing'
+                assignment.score = 0
+            else:  # Not Due and no submission
+                assignment.grade_status = None
+                assignment.score = None
+
+        assignment.due_status = 'Overdue' if assignment.deadline < timezone.now() else 'Not Due'
+
+    #     # Past due with no submission
+    #     if assignment.deadline < timezone.now():  
+    #         total_available_points += assignment.weight
+    #         # assignment.grade_status = 'Ungraded'
+    #         assignment.due_status = 'Overdue'
+    #         assignment.score = 0
+    #     # Not due yet
+    #     else:
+    #         assignment.due_status = 'Not Due'
+    #         assignment.score = None
+    # else:
+    #     user_role = "unknown"
     
     if request.method == "POST":
         file = request.FILES.get('file')
         if file:
-            alice = get_object_or_404(User, username='a')
+            user = get_object_or_404(User, username=request.user)
             try:
-                submission = models.Submission.objects.get(assignment=assignment, author=alice)
+                submission = models.Submission.objects.get(assignment=assignment, author=user)
                 submission.file = file
             except models.Submission.DoesNotExist:
-                garry_grader = get_object_or_404(User, username='g')
-                submission = models.Submission(assignment=assignment, author=alice, grader=garry_grader, file=file, score=None)
+                grader = pick_grader(assignment)
+                submission = models.Submission(assignment=assignment, author=user, grader=grader, file=file, score=None)
             submission.save()
             return redirect('assignment', assignment_id=assignment_id)
 
@@ -55,13 +105,23 @@ def assignment(request, assignment_id):
         'points' : assignment.points,
         'submissions' : assignment.submission_set.count(),
         'user_submissions' : user_submissions,
-        # 'alice_submissions' : alice_submissions,
+        "earned_points": total_earned_points,
+        "available_points": total_available_points,
+        "score": assignment.score,
+        "grade_status": assignment.grade_status,
+        "due_status": assignment.due_status,
         'submissions_assigned' : submissions_assigned_to_user,
-        # 'submissions_assigned' : submissions_assigned_to_g,
         'student_count' : models.Group.objects.get(name="Students").user_set.count(),
         "user_role": user_role,
     }
     return render(request, "assignment.html", assignment_data)
+
+def pick_grader(Assignment):
+    ta_group = Group.objects.get(name="Teaching Assistants")
+    ta_users = ta_group.user_set.annotate(
+        total_assigned=Count('graded_set', filter=Q(graded_set__assignment=Assignment))
+    ).order_by('total_assigned')
+    return ta_users.first()
 
 def submissions(request, assignment_id):
     assignment = get_object_or_404(models.Assignment, id=assignment_id)
@@ -110,17 +170,77 @@ def submissions(request, assignment_id):
 
 
 def profile(request):
-    assignments = models.Assignment.objects.annotate(
-        submission_count=Count('submission'),
-        submissions_graded=Count('submission', filter=Q(submission__score__isnull=False)),
-    )
-    grader_name = User.objects.get(username='g')
+
+    if not request.user.is_authenticated:  # Anonymous users are treated as students and log in as Alice Algorithmer
+        user_role = "student"
+        user = User.objects.get(username='a')
+        assignments = models.Assignment.objects.annotate(
+            submission_count=Count('submission'),
+            submissions_graded=Count('submission', filter=Q(submission__score__isnull=False)),
+        )
+        current_grade = None
+    elif is_admin(request.user):  # Admin user
+        user_role = "admin"
+        user = User.objects.get(username=request.user)
+        assignments = models.Assignment.objects.annotate(
+            submission_count=Count('submission'),
+            submissions_graded=Count('submission', filter=Q(submission__score__isnull=False)),
+        )
+    elif is_ta(request.user):  # TA user
+        user_role = "ta"
+        user = User.objects.get(username=request.user)
+        assignments = models.Assignment.objects.annotate(
+            submission_count=Count('submission', filter=Q(submission__grader=user)),
+            submissions_graded=Count('submission', filter=Q(submission__grader=user, submission__score__isnull=False)),
+        )
+    elif is_student(request.user):  # Student user
+        user_role = "student"
+        user = User.objects.get(username=request.user)
+         # Get all assignments for this student
+        assignments = models.Assignment.objects.all()
+
+        # Initialize grade points
+        total_available_points = 0
+        total_earned_points = 0
+
+        for assignment in assignments:
+            submission = models.Submission.objects.filter(assignment=assignment, author=user).first()
+            if submission:
+                # Graded submission 
+                if submission.score is not None:  
+                    assignment.score = (submission.score / assignment.points) * 100
+                    total_available_points += assignment.weight
+                    total_earned_points += (submission.score / assignment.points) * assignment.weight
+                    assignment.status = 'Graded'
+                # Submitted but not yet graded
+                else:  
+                    assignment.status = 'Ungraded'
+            # Past due with no submission
+            elif assignment.deadline < timezone.now():  
+                total_available_points += assignment.weight
+                assignment.status = 'Missing'
+            # Not due yet
+            else:
+                assignment.status = 'Not Due'
+
+        # Calculate the current grade
+        if total_available_points > 0:
+            current_grade = (total_earned_points / total_available_points) * 100
+        else:
+            current_grade = 100  # No assignments due yet
+
+    else:
+        user_role = "unknown"
+        assignments = models.Assignment.objects.none()
+        current_grade = None
 
     profile_info = {
-        'Assignments': assignments,
-        'grader_name': grader_name,
-        'user' : request.user
+        'assignments': assignments,
+        'user': request.user,
+        'user_role': user_role,
+        'current_grade': round(current_grade, 2) if user_role == "student" else None,
     }
+
 
     return render(request, "profile.html", profile_info)
 
