@@ -8,16 +8,33 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
 from django.contrib.auth.models import Group
+from django.contrib.auth.decorators import login_required
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.contrib.auth.decorators import user_passes_test
+from django.core.exceptions import PermissionDenied
+
+def is_student(user):
+    return user.groups.filter(name="Students").exists()
+
+def is_ta(user):
+    return user.groups.filter(name="Teaching Assistants").exists()
+
+def is_admin(user):
+    return user.is_superuser
+
 
 # Create your views here.
+@login_required
 def index(request):
     assignments = models.Assignment.objects.all()
     return render(request, "index.html", {
         'Assignments' : assignments
     })
 
+@login_required
 def assignment(request, assignment_id):
     request.user
+    error_message = None
     assignment = get_object_or_404(models.Assignment, id=assignment_id)
     user_submissions = assignment.submission_set.filter(author=request.user)
     print(user_submissions)
@@ -86,15 +103,51 @@ def assignment(request, assignment_id):
     if request.method == "POST":
         file = request.FILES.get('file')
         if file:
-            user = get_object_or_404(User, username=request.user)
-            try:
-                submission = models.Submission.objects.get(assignment=assignment, author=user)
-                submission.file = file
-            except models.Submission.DoesNotExist:
-                grader = pick_grader(assignment)
-                submission = models.Submission(assignment=assignment, author=user, grader=grader, file=file, score=None)
-            submission.save()
-            return redirect('assignment', assignment_id=assignment_id)
+        # Validate the file name ends with ".pdf"
+            if not file.name.lower().endswith('.pdf'):
+                error_message = "The uploaded file must be a PDF (with a .pdf extension)."
+            else:
+                try:
+                    # Check that the file starts with "%PDF-"
+                    if not next(file.chunks()).startswith(b'%PDF-'):
+                        error_message = "The uploaded file is not a valid PDF."
+                except Exception as e:
+                    error_message = "An error occurred while validating the file. Please try again."
+            if not error_message:
+                max_file_size = 64 * 1024 * 1024  # 64 MiB in bytes
+                if file.size > max_file_size:
+                    error_message = "The uploaded file exceeds the maximum size of 64 MiB."
+                else:
+                    user = get_object_or_404(User, username=request.user)
+                    try:
+                        submission = models.Submission.objects.get(assignment=assignment, author=user)
+                        submission.file = file
+                    except models.Submission.DoesNotExist:
+                        grader = pick_grader(assignment)
+                        submission = models.Submission(
+                            assignment=assignment,
+                            author=user,
+                            grader=grader,
+                            file=file,
+                            score=None
+                        )
+                    submission.save()
+                    return redirect('assignment', assignment_id=assignment_id)
+
+
+
+    # if request.method == "POST":
+    #     file = request.FILES.get('file')
+    #     if file:
+    #         user = get_object_or_404(User, username=request.user)
+    #         try:
+    #             submission = models.Submission.objects.get(assignment=assignment, author=user)
+    #             submission.file = file
+    #         except models.Submission.DoesNotExist:
+    #             grader = pick_grader(assignment)
+    #             submission = models.Submission(assignment=assignment, author=user, grader=grader, file=file, score=None)
+    #         submission.save()
+    #         return redirect('assignment', assignment_id=assignment_id)
 
     assignment_data = {
         'assignment_id' : assignment_id,
@@ -113,6 +166,7 @@ def assignment(request, assignment_id):
         'submissions_assigned' : submissions_assigned_to_user,
         'student_count' : models.Group.objects.get(name="Students").user_set.count(),
         "user_role": user_role,
+        "error_message": error_message,
     }
     return render(request, "assignment.html", assignment_data)
 
@@ -123,6 +177,8 @@ def pick_grader(Assignment):
     ).order_by('total_assigned')
     return ta_users.first()
 
+@login_required
+@user_passes_test(is_ta)
 def submissions(request, assignment_id):
     assignment = get_object_or_404(models.Assignment, id=assignment_id)
     if request.user.is_superuser:
@@ -146,8 +202,14 @@ def submissions(request, assignment_id):
                         grade = float(value)
                         if grade < 0 or grade > assignment.points:
                             raise ValueError("Grade must be between 0 and the number of points offered on this assignment.")
-                        submission.score = grade
-                        submission.save()
+                        try:
+                            submission.change_grade(request.user, grade)
+                            submission.save()  # Save changes after grade modification
+                        except PermissionDenied:
+                            if submission_id not in errors:
+                                errors[submission_id] = []
+                            errors[submission_id].append("You do not have permission to change this grade.")
+         
                     except ValueError as e:
                         if submission_id not in errors:
                             errors[submission_id] = []
@@ -168,9 +230,8 @@ def submissions(request, assignment_id):
 
     return render(request, "submissions.html", context)
 
-
+@login_required
 def profile(request):
-
     if not request.user.is_authenticated:  # Anonymous users are treated as students and log in as Alice Algorithmer
         user_role = "student"
         user = User.objects.get(username='a')
@@ -245,16 +306,24 @@ def profile(request):
     return render(request, "profile.html", profile_info)
 
 def login_form(request):
+    next_url = request.GET.get('next', 'profile')
+    errors = {}
+
     if request.method == "POST":
+        next_url = request.POST.get('next', 'profile')
         inputted_username = request.POST.get("username", "")
         inputted_password = request.POST.get("password", "")
         user = authenticate(username = inputted_username, password = inputted_password)
         if user is not None:
             login(request, user)
-            return redirect("profile")
+            if url_has_allowed_host_and_scheme(next_url, allowed_hosts=None):
+                return redirect(next_url)
+            else:
+                return redirect('/')  # Redirect to home page if URL is unsafe
         else:
-            return render(request, "login.html")
-    return render(request, "login.html")
+            errors[0] = "Username and password do not match"
+            return render(request, "login.html", {"next":next_url, "errors":errors})
+    return render(request, "login.html", {"next":next_url, "errors":errors})
 
 def logout_form(request):
     logout(request)
@@ -279,15 +348,15 @@ def process_grades(post_data, assignment, grader):
     models.Submission.objects.bulk_update(submissions_to_update, ['score'])
     print(f"Updated Submissions: {len(submissions_to_update)}")
 
+@login_required
 def show_upload(request, filename):
     submission = get_object_or_404(models.Submission, file=filename)
-    return HttpResponse(submission.file.open())
 
-def is_student(user):
-    return user.groups.filter(name="Students").exists()
-
-def is_ta(user):
-    return user.groups.filter(name="Teaching Assistants").exists()
-
-def is_admin(user):
-    return user.is_superuser
+    try:
+        # Enforce the security policy using the `view_submission` method
+        file_field = submission.view_submission(request.user)
+        # Return the file as a response
+        return HttpResponse(file_field.open())
+    except PermissionDenied:
+        # Return a proper error response if permission is denied
+        return HttpResponse("You do not have permission to view this file.", status=403)

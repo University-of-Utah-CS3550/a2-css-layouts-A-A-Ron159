@@ -12,9 +12,19 @@
 <!--Login Details-->
 <main>
     <div>
+
+        {% if errors %}
+        <div class="error-messages">
+            {% for error in errors.values %}
+            <output>{{ error }}</output>
+            {% endfor %}
+        </div>
+        {% endif %}
+
     <h1>Log in</h1>
     <form action="/profile/login/" method="post">
         {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
         <div>
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" autofocus="true" title="Enter in a username"/>

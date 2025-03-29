@@ -11,6 +11,12 @@
 
 <!--Assignment Content-->
 <main>
+    {% if error_message %}
+    <div class="error-messages">
+        <output>{{ error_message }}</output>
+    </div>
+    {% endif %}
+
     <div>
         <h1>{{ title }}</h1>
         <p>Due {{ deadline }}, total of {{ points }} point{{ points|pluralize }}<p>
@@ -18,11 +24,6 @@
         <!--Submission Card-->
         {% if user_role == 'student' %}
         <section>
-            <!-- {% if user_submissions.exists %}
-                <p>Current submission: <a href="{{ user_submissions.first.file.url }}" title="View Submission">{{ user_submissions.first.file.name }}</a></p>
-            {% else %}
-                <p>No current submission</p>
-            {% endif %} -->
 
             {% if grade_status == 'Graded' %}
                 <p>Your submission, <a href="{{ user_submissions.first.file.url }}" title="View Submission">{{ user_submissions.first.file.name }}</a>, received {{earned_points}}/{{available_points}} points ({{score}}%)</p>
@@ -47,7 +48,7 @@
                 {% if due_status == "Not Due" %}
                 <form action="{% url 'assignment' assignment_id %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <input type="file" name="file">
+                    <input type="file" name="file" accept="application/pdf">
                     <input type="submit" value="Submit">
                 </form>
                 {% endif %}
