@@ -308,3 +308,15 @@ section div a{
 input:invalid {
     border: 2px solid red;
 }
+
+th.sort-column {
+    cursor: pointer;
+}
+
+th.sort-asc::after {
+    content: " \25b2"; /* Up arrow */
+}
+
+th.sort-desc::after {
+    content: " \25bc"; /* Down arrow */
+}

@@ -22,32 +22,38 @@
 
         <table class="sortable">
             <thead>
-            <tr>
-                <th class="txtcol">Assignment</th>
-                {% if user_role == "admin" or user_role == "ta" %}
-                <th class="numcol">Graded</th>
-                {% endif %}
-                {% if user_role == "student" %}
-                <th class="numcol">Score</th>
-                {% endif %}
-            </tr>
+                <tr>
+                    <th class="txtcol">Assignment</th>
+                    {% if user_role == "admin" or user_role == "ta" %}
+                    <th class="sort-column">Graded</th>
+                    {% endif %}
+                    {% if user_role == "student" %}
+                    <th class="sort-column">Score</th>
+                    {% endif %}
+                </tr>
             </thead>
-            {% for assignment in assignments %}
-            <tr>
-                <td><a href="/{{ assignment.id }}/" title="{{ assignment.title }}">{{ assignment.title }}</a></td>
-                {% if user_role == "student" %}
-                <td class="numcol">{% if assignment.status == "Graded" %}{{ assignment.score |floatformat:2 }}%{% else %}{{ assignment.status }}{% endif %}</td>
-                {% endif %}
-                {% if user_role == "admin" or user_role == "ta" %}
-                <td class="numcol">{{ assignment.submissions_graded }}/{{ assignment.submission_count }}</td>
-                {% endif %}
-            </tr>
-            {% endfor %}
+            <tbody>
+                {% for assignment in assignments %}
+                <tr data-index="{{ forloop.counter }}">
+                    <td><a href="/{{ assignment.id }}/" title="{{ assignment.title }}">{{ assignment.title }}</a></td>
+                    {% if user_role == "student" %}
+                    <td class="numcol" data-value="{% if assignment.status == 'Graded' %}{{ assignment.score |floatformat:2 }}%{% else %}{{ assignment.status }}{% endif %}">
+                        {% if assignment.status == 'Graded' %}{{ assignment.score |floatformat:2 }}%{% else %}{{ assignment.status }}{% endif %}
+                    </td>
+                    {% endif %}
+                    {% if user_role == "admin" or user_role == "ta" %}
+                    <td class="numcol" data-value="{{ assignment.submissions_graded }}/{{ assignment.submission_count }}">{{ assignment.submissions_graded }}/{{ assignment.submission_count }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
             {% if user_role == "student" %}
-            <tr>
-                <th class="txtcol">Final Grade</th>
-                <th class="numcol">{{ current_grade|floatformat:2 }}%</td>
-            </tr>
+            <tfoot>
+                <tr>
+                    <th class="txtcol">Final Grade</th>
+                    <th class="numcol">{{ current_grade|floatformat:2 }}%</th>
+                </tr>
+            </tfoot>
             {% endif %}
         </table>
     </div>

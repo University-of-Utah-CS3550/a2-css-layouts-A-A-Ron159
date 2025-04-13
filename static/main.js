@@ -5,38 +5,46 @@ function say_hi(elt) {
 say_hi(document.querySelector("h1"));
 
 function make_table_sortable(table) {
-    const headerCell = table.querySelector('thead th:last-child');
-    let sortState = 'unsorted';
+    const headers = table.querySelectorAll('thead th.sort-column');
+    const tbody = table.querySelector('tbody');
+    const originalOrder = Array.from(tbody.querySelectorAll('tr'));
 
-    headerCell.addEventListener('click', () => {
-        if (sortState === 'unsorted' || sortState === 'sort-desc') {
-            sortState = 'sort-asc';
-            headerCell.className = 'sort-asc';
-        } else {
-            sortState = 'sort-desc';
-            headerCell.className = 'sort-desc';
-        }
+    headers.forEach(header => {
+        header.addEventListener('click', () => {
+            const columnIndex = header.cellIndex;
+            let rows = Array.from(tbody.querySelectorAll('tr'));
 
-        if (sortState === 'sort-asc') {
-            headerCell.classList.remove('sort-desc');
-        } else if (sortState === 'sort-desc') {
-            headerCell.classList.remove('sort-asc');
-        }
+            headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
 
-        const tbody = table.querySelector('tbody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
+            let sortState = header.dataset.sortState || 'unsorted';
+            if (sortState === 'unsorted') {
+                sortState = 'sort-asc';
+                header.className = 'sort-asc';
+            } else if (sortState === 'sort-asc') {
+                sortState = 'sort-desc';
+                header.className = 'sort-desc';
+            } else {
+                sortState = 'unsorted';
+                header.className = '';
+            }
+            header.dataset.sortState = sortState;
 
-        rows.sort((rowA, rowB) => {
-            const cellA = rowA.querySelector('td:last-child').textContent;
-            const cellB = rowB.querySelector('td:last-child').textContent;
+            if (sortState === 'unsorted') {
+                rows = [...originalOrder];
+            } else {
+                rows.sort((rowA, rowB) => {
+                    const cellA = rowA.querySelector(`td:nth-child(${columnIndex + 1})`);
+                    const cellB = rowB.querySelector(`td:nth-child(${columnIndex + 1})`);
 
-            const valueA = parseFloat(cellA.replace('%', ''));
-            const valueB = parseFloat(cellB.replace('%', ''));
+                    const valueA = parseFloat(cellA?.getAttribute('data-value')) || 0;
+                    const valueB = parseFloat(cellB?.getAttribute('data-value')) || 0;
 
-            return sortState === 'sort-asc' ? valueA - valueB : valueB - valueA;
+                    return sortState === 'sort-asc' ? valueA - valueB : valueB - valueA;
+                });
+            }
+
+            rows.forEach(row => tbody.appendChild(row));
         });
-
-        rows.forEach(row => tbody.appendChild(row));
     });
 }
 

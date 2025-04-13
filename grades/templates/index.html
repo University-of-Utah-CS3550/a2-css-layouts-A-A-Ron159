@@ -14,19 +14,23 @@
 <main>
     <div>
     <h1>All assignments</h1>
-    <table>
-        <tr>
-            <th class="txtcol">Assignment</th>
-            <th class="txtcol">Due Date</th>
-            <th class="numcol">Weight</th>
-        </tr>
-        {% for assignment in Assignments %}
-        <tr>
-            <td><a href="/{{ assignment.id }}/" title="{{ assignment.title }}">{{ assignment.title }}</a><td>
-            <td>{{ assignment.deadline }}</td>
-            <td class="numcol">{{ assignment.points }}</td>
-        </tr>
-        {% endfor %}
+    <table class="sortable">
+        <thead>
+            <tr>
+                <th class="txtcol">Assignment</th>
+                <th class="sort-column">Due Date</th>
+                <th class="sort-column">Weight</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for assignment in Assignments %}
+            <tr>
+                <td><a href="/{{ assignment.id }}/" title="{{ assignment.title }}">{{ assignment.title }}</a></td>
+                <td data-value="{{ assignment.deadline|date:'U'}}">{{ assignment.deadline }}</td>
+                <td data-value="{{ assignment.points }}">{{ assignment.points }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
     </div>
 </main>
