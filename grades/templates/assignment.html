@@ -1,5 +1,5 @@
 <!doctype html>
-<title>Homework 1 (HTML) - CS 3550</title>
+<title>{{ title }} - CS 3550</title>
 <meta charset="UTF-8"></meta>
 <link rel="icon" href="/static/favicon.ico"></link>
 <link rel="stylesheet" href="/static/main.css">
@@ -46,7 +46,7 @@
             {% endif %}
 
                 {% if due_status == "Not Due" %}
-                <form action="{% url 'assignment' assignment_id %}" method="post" enctype="multipart/form-data">
+                <form class="assignmentForm" action="{% url 'assignment' assignment_id %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <input type="file" name="file" accept="application/pdf">
                     <input type="submit" value="Submit">

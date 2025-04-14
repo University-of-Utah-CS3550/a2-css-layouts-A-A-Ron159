@@ -86,19 +86,6 @@ def assignment(request, assignment_id):
                 assignment.score = None
 
         assignment.due_status = 'Overdue' if assignment.deadline < timezone.now() else 'Not Due'
-
-    #     # Past due with no submission
-    #     if assignment.deadline < timezone.now():  
-    #         total_available_points += assignment.weight
-    #         # assignment.grade_status = 'Ungraded'
-    #         assignment.due_status = 'Overdue'
-    #         assignment.score = 0
-    #     # Not due yet
-    #     else:
-    #         assignment.due_status = 'Not Due'
-    #         assignment.score = None
-    # else:
-    #     user_role = "unknown"
     
     if request.method == "POST":
         file = request.FILES.get('file')
@@ -133,21 +120,6 @@ def assignment(request, assignment_id):
                         )
                     submission.save()
                     return redirect('assignment', assignment_id=assignment_id)
-
-
-
-    # if request.method == "POST":
-    #     file = request.FILES.get('file')
-    #     if file:
-    #         user = get_object_or_404(User, username=request.user)
-    #         try:
-    #             submission = models.Submission.objects.get(assignment=assignment, author=user)
-    #             submission.file = file
-    #         except models.Submission.DoesNotExist:
-    #             grader = pick_grader(assignment)
-    #             submission = models.Submission(assignment=assignment, author=user, grader=grader, file=file, score=None)
-    #         submission.save()
-    #         return redirect('assignment', assignment_id=assignment_id)
 
     assignment_data = {
         'assignment_id' : assignment_id,

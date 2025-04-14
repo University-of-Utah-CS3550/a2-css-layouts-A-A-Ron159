@@ -20,6 +20,10 @@
             </div>
         </section>
 
+        {% if user_role == "student" %}
+        <button class="hypothesizeButton">Hypothesize</button>
+        {% endif %}
+
         <table class="sortable">
             <thead>
                 <tr>
@@ -37,7 +41,7 @@
                 <tr data-index="{{ forloop.counter }}">
                     <td><a href="/{{ assignment.id }}/" title="{{ assignment.title }}">{{ assignment.title }}</a></td>
                     {% if user_role == "student" %}
-                    <td class="numcol" data-value="{% if assignment.status == 'Graded' %}{{ assignment.score |floatformat:2 }}%{% else %}{{ assignment.status }}{% endif %}">
+                    <td class="numcol" data-weight="{{ assignment.weight }}" data-value="{% if assignment.status == 'Graded' %}{{ assignment.score |floatformat:2 }}%{% else %}{{ assignment.status }}{% endif %}">
                         {% if assignment.status == 'Graded' %}{{ assignment.score |floatformat:2 }}%{% else %}{{ assignment.status }}{% endif %}
                     </td>
                     {% endif %}
