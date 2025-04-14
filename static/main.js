@@ -57,13 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function make_form_async(form) {
     form.addEventListener("submit", async (event) => {
-        event.preventDefault(); // Prevent default form submission
+        event.preventDefault();
 
-        const formData = new FormData(form); // Gather form data
-        const action = form.getAttribute('action'); // Form's action URL
+        const formData = new FormData(form);
+        const action = form.getAttribute('action');
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value; // CSRF Token
 
-        const statusMessage = document.createElement("p"); // Status message element
+        const statusMessage = document.createElement("p");
 
         const previousMessage = form.querySelector(".status-message");
         if (previousMessage) {
@@ -77,7 +77,7 @@ async function make_form_async(form) {
                 method: "POST",
                 body: formData,
                 headers: {
-                    'X-CSRFToken': csrfToken, // Include CSRF token
+                    'X-CSRFToken': csrfToken,
                 },
             });
 
@@ -85,14 +85,12 @@ async function make_form_async(form) {
                 throw new Error(`Upload failed! HTTP Status: ${response.status}`);
             }
 
-            // Parse and display success message
-            const result = await response.json(); // Expecting JSON response
+            const result = await response.json();
             statusMessage.textContent = result.message || "Upload succeeded!";
             statusMessage.style.color = "green";
 
             console.log("Success:", result);
         } catch (error) {
-            // Handle and display error message
             statusMessage.textContent = `Upload failed! ${error.message}`;
             statusMessage.style.color = "red";
 
